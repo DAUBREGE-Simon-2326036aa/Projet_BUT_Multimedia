@@ -1,32 +1,48 @@
 using UnityEngine;
-using UnityEngine.InputSystem; // Pour la touche E
+using UnityEngine.InputSystem;
 
 namespace BUT
 {
     public class OrdinateurDeBord : MonoBehaviour
     {
-        [Header("Audio")]
-        public AudioClip sonDecollage; 
+        [Header("Configuration")]
+        public Transform pointTeleportation;
 
+        [Header("Audio")]
+        public AudioClip sonInteraction;
+        public AudioClip sonRefus; 
+
+        private GameObject joueurDetecte;
         private bool joueurEstDevant = false;
-        private bool estActive = false;
 
         private void Update()
         {
-            if (joueurEstDevant && !estActive && Keyboard.current.eKey.wasPressedThisFrame)
+            if (joueurEstDevant && joueurDetecte != null && Keyboard.current.eKey.wasPressedThisFrame)
             {
-                LancerDecollage();
+                if (GameManager.Instance.porteVaisseauOuverte == true)
+                {
+                    ActiverTeleportation();
+                }
+                else
+                {
+                    Debug.Log("L'ordinateur est verrouillé. Ouvrez d'abord la porte du vaisseau !");
+                    if (sonRefus) AudioSource.PlayClipAtPoint(sonRefus, transform.position);
+                }
             }
         }
 
-        private void LancerDecollage()
+        private void ActiverTeleportation()
         {
-            estActive = true;
-            Debug.Log("Séquence de décollage initiée...");
+            Debug.Log("Téléportation...");
+            if (sonInteraction) AudioSource.PlayClipAtPoint(sonInteraction, transform.position);
 
-            if (sonDecollage) AudioSource.PlayClipAtPoint(sonDecollage, transform.position);
+            CharacterController cc = joueurDetecte.GetComponent<CharacterController>();
+            if (cc != null) cc.enabled = false;
 
-            GameManager.Instance.WinLevel();
+            joueurDetecte.transform.position = pointTeleportation.position;
+            joueurDetecte.transform.rotation = pointTeleportation.rotation;
+
+            if (cc != null) cc.enabled = true;
         }
 
         private void OnTriggerEnter(Collider other)
@@ -34,7 +50,12 @@ namespace BUT
             if (other.CompareTag("Player"))
             {
                 joueurEstDevant = true;
-                if (!estActive) Debug.Log("Appuie sur [E] pour décoller");
+                joueurDetecte = other.gameObject;
+
+                if (GameManager.Instance.porteVaisseauOuverte)
+                    Debug.Log("Appuie sur [E] pour entrer");
+                else
+                    Debug.Log("Ordinateur Inactif (Porte fermée)");
             }
         }
 
@@ -43,6 +64,7 @@ namespace BUT
             if (other.CompareTag("Player"))
             {
                 joueurEstDevant = false;
+                joueurDetecte = null;
             }
         }
     }

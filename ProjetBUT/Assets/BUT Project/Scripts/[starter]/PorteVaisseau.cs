@@ -1,18 +1,19 @@
 using UnityEngine;
-using UnityEngine.InputSystem; // Nécessaire pour la touche E
+using UnityEngine.InputSystem;
 
 namespace BUT
 {
     public class PorteVaisseau : MonoBehaviour
     {
         [Header("Réglages de la Porte")]
-        public GameObject porteMobile; 
-        public Vector3 angleOuverture = new Vector3(-49.40f, 0f, 0f); // L'angle final quand elle est ouverte
+        public GameObject porteMobile;
+        public Vector3 angleOuverture = new Vector3(-49.40f, 0f, 0f);
         public float vitesseOuverture = 2f;
+        public int coutPieces = 10;
 
         [Header("Audio")]
         public AudioClip sonOuverture;
-        public AudioClip sonVerrouille; 
+        public AudioClip sonVerrouille;
 
         private bool joueurEstDevant = false;
         private bool estOuverte = false;
@@ -25,7 +26,6 @@ namespace BUT
 
         private void Update()
         {
-            // Si le joueur est devant + appuie sur E + la porte n'est pas déjà ouverte
             if (joueurEstDevant && !estOuverte && Keyboard.current.eKey.wasPressedThisFrame)
             {
                 TenterOuverture();
@@ -44,17 +44,31 @@ namespace BUT
 
         private void TenterOuverture()
         {
-            if (GameManager.Instance.hasKey)
+            int scoreActuel = GameManager.Instance.score;
+            bool aLaCle = GameManager.Instance.hasKey;
+
+            if (aLaCle && scoreActuel >= coutPieces)
             {
                 Debug.Log("Systèmes réparés. Ouverture de la rampe...");
                 estOuverte = true;
+
                 if (sonOuverture) audioSource.PlayOneShot(sonOuverture);
+
+                Invoke("DebloquerOrdinateur", 1.5f);
             }
             else
             {
-                Debug.Log("Accès refusé ! Il manque la batterie (Key).");
+                if (!aLaCle) Debug.Log("Accès refusé ! Il manque la puce.");
+                else if (scoreActuel < coutPieces) Debug.Log($"Manque de pièces ({scoreActuel}/{coutPieces})");
+
                 if (sonVerrouille) audioSource.PlayOneShot(sonVerrouille);
             }
+        }
+
+        private void DebloquerOrdinateur()
+        {
+            GameManager.Instance.porteVaisseauOuverte = true;
+            Debug.Log("Ordinateur de bord : EN LIGNE (Prêt à téléporter)");
         }
 
         private void OnTriggerEnter(Collider other)
@@ -62,16 +76,13 @@ namespace BUT
             if (other.CompareTag("Player"))
             {
                 joueurEstDevant = true;
-                if (!estOuverte) Debug.Log("Appuie sur [E] pour ouvrir");
+                if (!estOuverte) Debug.Log($"Appuie sur [E] pour ouvrir (Coût: {coutPieces} pièces)");
             }
         }
 
         private void OnTriggerExit(Collider other)
         {
-            if (other.CompareTag("Player"))
-            {
-                joueurEstDevant = false;
-            }
+            if (other.CompareTag("Player")) joueurEstDevant = false;
         }
     }
 }

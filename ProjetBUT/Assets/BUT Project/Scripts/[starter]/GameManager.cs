@@ -14,6 +14,7 @@ namespace BUT
         [Header("Données de Jeu")]
         public int score = 0;
         public bool hasKey = false;
+        public bool porteVaisseauOuverte = false;
 
         private void Awake()
         {
