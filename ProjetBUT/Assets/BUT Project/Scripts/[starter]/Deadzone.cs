@@ -1,13 +1,15 @@
 using UnityEngine;
-using UnityEngine.SceneManagement; 
 
-public class DeadZone : MonoBehaviour
+namespace BUT
 {
-    private void OnTriggerEnter(Collider other)
+    public class DeadZone : MonoBehaviour
     {
-        if (other.CompareTag("Player"))
+        private void OnTriggerEnter(Collider other)
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            if (other.CompareTag("Player"))
+            {
+                GameManager.Instance.DeclencherMort();
+            }
         }
     }
 }

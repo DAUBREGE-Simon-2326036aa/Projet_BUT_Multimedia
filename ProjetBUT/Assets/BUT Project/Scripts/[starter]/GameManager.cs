@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 namespace BUT
 {
@@ -8,13 +9,16 @@ namespace BUT
         public static GameManager Instance;
 
         [Header("Interface Utilisateur")]
-        public TextMeshProUGUI textScore; 
-        public GameObject panelVictoire;  
+        public TextMeshProUGUI textScore;
+        public GameObject panelVictoire;
+        public GameObject panelGameOver;
 
         [Header("Données de Jeu")]
         public int score = 0;
         public bool hasKey = false;
         public bool porteVaisseauOuverte = false;
+
+        public string nomSceneMenu = "Menu";
 
         private void Awake()
         {
@@ -24,10 +28,10 @@ namespace BUT
 
         private void Start()
         {
-            if (panelVictoire != null)
-                panelVictoire.SetActive(false);
+            if (panelVictoire != null) panelVictoire.SetActive(false);
+            if (panelGameOver != null) panelGameOver.SetActive(false);
 
-            UpdateUI(); 
+            UpdateUI();
         }
 
         public void AddScore(int amount)
@@ -39,20 +43,38 @@ namespace BUT
         public void PickupKey()
         {
             hasKey = true;
-            Debug.Log("Batterie récupérée !");
         }
 
         public void WinLevel()
         {
-            Debug.Log("Victoire !");
-
             if (panelVictoire != null)
                 panelVictoire.SetActive(true);
 
             Time.timeScale = 0f;
-
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+        }
+
+        public void DeclencherMort()
+        {
+            if (panelGameOver != null)
+                panelGameOver.SetActive(true);
+
+            Time.timeScale = 0f;
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+
+        public void BoutonRecommencer()
+        {
+            Time.timeScale = 1f;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+
+        public void BoutonRetourMenu()
+        {
+            Time.timeScale = 1f;
+            SceneManager.LoadScene(nomSceneMenu);
         }
 
         private void UpdateUI()

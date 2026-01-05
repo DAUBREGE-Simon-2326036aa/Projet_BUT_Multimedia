@@ -9,7 +9,7 @@ namespace BUT
         public GameObject porteMobile;
         public Vector3 angleOuverture = new Vector3(-49.40f, 0f, 0f);
         public float vitesseOuverture = 2f;
-        public int coutPieces = 10;
+        public int coutPieces = 5;
 
         [Header("Audio")]
         public AudioClip sonOuverture;
